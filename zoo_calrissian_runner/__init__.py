@@ -10,8 +10,12 @@ import cwl_utils
 from eoap_cwlwrap import wrap
 #from eoap_cwlwrap import wrap_locations
 from cwl_loader import dump_cwl
+from cwl_loader import dump_cwl_with_custom_requirements
+from cwl_loader import extract_dask_config
 from cwl_loader import load_cwl_from_location as load_workflow
 from cwl_loader import load_cwl_from_yaml as load_cwl
+from cwl_loader import _custom_requirements_cache  # Access to custom requirements cache
+from cwl_loader import load_cwl_from_location
 from cwl_utils.parser import save
 from loguru import logger
 from pycalrissian.context import CalrissianContext
@@ -56,9 +60,6 @@ except ImportError:
     # Use centralized ZooStub from zoo-runner-common package
     from zoostub import ZooStub
     zoo = ZooStub()
-
-
-# Note: ZooConf, ZooInputs, ZooOutputs, CWLWorkflow are now in zoo-runner-common
 
 class ZooCalrissianRunner(BaseRunner):
     def __init__(
@@ -105,14 +106,6 @@ class ZooCalrissianRunner(BaseRunner):
                 value = value[:-1]
         return value
 
-    # Note: get_volume_size() is now inherited from BaseRunner
-
-
-    # Note: get_max_cores() is now inherited from BaseRunner
-
-
-    # Note: get_max_ram() is now inherited from BaseRunner
-
     def get_namespace_name(self):
         """creates or returns the namespace"""
         if self._namespace_name is None:
@@ -122,9 +115,6 @@ class ZooCalrissianRunner(BaseRunner):
             )
         else:
             return self._namespace_name
-
-
-    # Note: update_status() is now inherited from BaseRunner
 
     def get_annotations(self):
         """Get the labels for the execution."""
@@ -144,6 +134,32 @@ class ZooCalrissianRunner(BaseRunner):
         logger.info("wrap CWL workflow with stage-in/out steps")
         wrapped_workflow = self.wrap()
         self.update_status(progress=10, message="workflow wrapped, creating processing environment")
+
+        if "auth_env" in self.zoo_conf.conf and "cwd" in self.zoo_conf.conf["auth_env"]:
+            app_package_path = os.path.join(
+                self.zoo_conf.conf["auth_env"]["cwd"],
+                self.zoo_conf.workflow_id,
+                "app-package.cwl"
+            )
+            logger.info(f"Loading CWL from {app_package_path} to extract custom requirements")
+            try:
+                load_cwl_from_location(app_package_path)
+                dask_config = extract_dask_config()
+                if dask_config:
+                    logger.info(f"Dask Gateway configuration found in custom requirements: {dask_config}")
+                    if not dask_config.get('gateway_url'):
+                        default_url = os.environ.get('DASK_GATEWAY_URL', 'http://traefik-dask-gateway.eoap-dask-gateway.svc.cluster.local:80')
+                        dask_config['gateway_url'] = default_url
+                        logger.info(f"Using default Dask Gateway URL from environment: {default_url}")
+                else:
+                    dask_config = None
+                    logger.info("No Dask Gateway configuration found in custom requirements - Dask support disabled")
+            except Exception as e:
+                logger.warning(f"Could not load CWL from {app_package_path}: {e}")
+                dask_config = None
+        else:
+            logger.warning("Cannot determine app-package.cwl path, skipping Dask config extraction")
+            dask_config = None
 
         logger.info("create kubernetes namespace for Calrissian execution")
 
@@ -263,19 +279,33 @@ class ZooCalrissianRunner(BaseRunner):
 
         logger.info("create Calrissian job")
         self.update_status(progress=21, message="Submit execution")
-        job = CalrissianJob(
-            cwl=wrapped_workflow,
-            params=processing_parameters,
-            runtime_context=session,
-            cwl_entry_point="main",
-            max_cores=self.get_max_cores(),
-            max_ram=self.get_max_ram(),
-            pod_env_vars=self.handler.get_pod_env_vars(),
-            pod_node_selector=self.handler.get_pod_node_selector(),
-            debug=True,
-            no_read_only=True,
-            tool_logs=True,
-        )
+
+        # Prepare Calrissian job arguments
+        job_kwargs = {
+            "cwl": wrapped_workflow,
+            "params": processing_parameters,
+            "runtime_context": session,
+            "cwl_entry_point": "main",
+            "max_cores": self.get_max_cores(),
+            "max_ram": self.get_max_ram(),
+            "pod_env_vars": self.handler.get_pod_env_vars(),
+            "pod_node_selector": self.handler.get_pod_node_selector(),
+            # Use default ServiceAccount - pycalrissian will patch its RBAC to add configmaps
+            "debug": True,
+            "no_read_only": True,
+            "tool_logs": True,
+        }
+
+        # Add Dask Gateway configuration if available
+        if dask_config is not None:
+            if "gateway_url" in dask_config and dask_config["gateway_url"]:
+                job_kwargs["dask_gateway_url"] = dask_config["gateway_url"]
+                logger.info(f"Setting Dask Gateway URL: {dask_config['gateway_url']}")
+            if "configmap" in dask_config and dask_config["configmap"]:
+                job_kwargs["dask_script_configmap"] = dask_config["configmap"]
+                logger.info(f"Setting Dask script configmap: {dask_config['configmap']}")
+
+        job = CalrissianJob(**job_kwargs)
 
         self.update_status(progress=23, message="execution submitted")
 
@@ -344,13 +374,35 @@ class ZooCalrissianRunner(BaseRunner):
 
     def wrap(self):
         workflow_id = self.get_workflow_id()
+
+        # Load the CWL from the deployed app-package.cwl file which contains the customs
+        if "auth_env" in self.zoo_conf.conf and "cwd" in self.zoo_conf.conf["auth_env"]:
+            app_package_path = os.path.join(
+                self.zoo_conf.conf["auth_env"]["cwd"],
+                self.zoo_conf.workflow_id,
+                "app-package.cwl"
+            )
+            logger.info(f"Loading CWL with customs from {app_package_path} for wrapping")
+            try:
+                with open(app_package_path, 'r') as f:
+                    cwl_yaml_with_customs = yaml.safe_load(f)
+
+                cwl_with_customs = load_cwl(cwl_yaml_with_customs)
+
+                logger.info("CWL loaded successfully with customs")
+            except Exception as e:
+                logger.warning(f"Could not load from {app_package_path}: {e}, using self.workflow.cwl")
+                cwl_with_customs = self.workflow.cwl
+        else:
+            logger.warning("No auth_env/cwd found, using self.workflow.cwl without customs")
+            cwl_with_customs = self.workflow.cwl
         
         # Get the workflow object
         workflow = self.workflow.get_workflow()
         
         # Rename any CommandLineTool/process named 'main' to avoid conflict with orchestrator
         # The orchestrator created by eoap-cwlwrap is always named 'main'
-        for elem in self.workflow.cwl:
+        for elem in cwl_with_customs if isinstance(cwl_with_customs, list) else [cwl_with_customs]:
             if hasattr(elem, 'id') and elem.id == 'main':
                 # Rename to avoid conflict - use the workflow name or 'clt'
                 new_id = f"{workflow_id}_clt"
@@ -384,34 +436,17 @@ class ZooCalrissianRunner(BaseRunner):
         )
 
         try:
+            # Wrap with the CWL that has customs
             wrapped_workflow = wrap(
-                workflows=self.workflow.cwl,
+                workflows=cwl_with_customs,
                 workflow_id=process_to_wrap,
                 directory_stage_in=directory_stage_in_cwl,
                 file_stage_in=file_stage_in_cwl,
                 stage_out=directory_stage_out_cwl,
             )
-            
-            # Serialize using dump_cwl
-            from cwl_loader import dump_cwl
-            from io import StringIO
-            import yaml
-            
             stream = StringIO()
-            try:
-                dump_cwl(wrapped_workflow, stream)
-                wf = yaml.safe_load(stream.getvalue())
-            except Exception as e:
-                # Fallback: manual serialization if dump_cwl fails
-                logger.warning(f"dump_cwl failed: {e}, using manual serialization")
-                if isinstance(wrapped_workflow, list):
-                    wf = {
-                        '$graph': [proc.save() for proc in wrapped_workflow],
-                        'cwlVersion': 'v1.2'
-                    }
-                else:
-                    wf = wrapped_workflow.save()
-                
+            dump_cwl_with_custom_requirements(process=wrapped_workflow, stream=stream)
+            wf = yaml.safe_load(stream.getvalue())
         except Exception as e:
             logger.error(f"Cannot wrap CWL: {e}")
             raise e
