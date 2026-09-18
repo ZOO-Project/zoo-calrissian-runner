@@ -27,23 +27,30 @@ dependencies = [
     "zoo-runner-common",
     "zoo-template-common",
     "pycalrissian",
-    "eoap_cwlwrap",
+    "eoap_cwlwrap @ git+https://github.com/GeoLabs/eoap-cwlwrap.git@feature/add-file-stageout-support",
+    "cwl-loader @ git+https://github.com/GeoLabs/cwl-loader.git@feature/add-dask-support",
     "cwl-utils>=0.14",
     "attrs",
     "loguru",
     "setuptools",
-    "kubernetes>=34.1.0",
+    "kubernetes>=28.1.0",
     "cwltool",
     "zoo-framework"
 ]
 
 [project.urls]
-Documentation = "https://github.com/EOEPCA/zoo-calrissian-runner#readme"
-Issues = "https://github.com/EOEPCA/zoo-calrissian-runner/issues"
-Source = "https://github.com/EOEPCA/zoo-calrissian-runner"
+Homepage = "https://github.com/ZOO-Project/zoo-calrissian-runner"
+Documentation = "https://zoo-project.github.io/zoo-calrissian-runner/"
+Issues = "https://github.com/ZOO-Project/zoo-calrissian-runner/issues"
+Source = "https://github.com/ZOO-Project/zoo-calrissian-runner"
+Changelog = "https://github.com/ZOO-Project/zoo-calrissian-runner/blob/main/CHANGELOG.md"
 
 [tool.hatch.version]
 path = "zoo_calrissian_runner/__about__.py"
+
+
+[tool.hatch.metadata]
+allow-direct-references = true
 
 
 [tool.coverage.run]
@@ -73,7 +80,8 @@ skip-install = false
 dependencies = [
     "zoo-runner-common",
     "pycalrissian",
-    "eoap_cwlwrap",
+    "eoap_cwlwrap @ git+https://github.com/GeoLabs/eoap-cwlwrap.git@feature/add-file-stageout-support",
+    "cwl-loader @ git+https://github.com/GeoLabs/cwl-loader.git@feature/add-dask-support",
     "cwl-utils>=0.14",
     "attrs",
     "loguru",
@@ -91,7 +99,8 @@ dependencies = [
     "nose2",
     "coverage",
     "pycalrissian",
-    "eoap_cwlwrap",
+    "eoap_cwlwrap @ git+https://github.com/GeoLabs/eoap-cwlwrap.git@feature/add-file-stageout-support",
+    "cwl-loader @ git+https://github.com/GeoLabs/cwl-loader.git@feature/add-dask-support",
     "cwl-utils>=0.14",
     "attrs",
     "loguru",

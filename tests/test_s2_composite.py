@@ -49,8 +49,10 @@ class TestSentinel2Composites(unittest.TestCase):
                 cwl = yaml.safe_load(stream)
 
             cls.cwl = cwl
-            
-    @unittest.skipIf(os.getenv("CI_TEST_SKIP") == "1", "Test is skipped via env variable")
+
+    @unittest.skipIf(
+        os.getenv("CI_TEST_SKIP") == "1", "Test is skipped via env variable"
+    )
     def test_execution(self):
         class CalrissianRunnerExecutionHandler(ExecutionHandler):
             def pre_execution_hook(self):
@@ -60,7 +62,7 @@ class TestSentinel2Composites(unittest.TestCase):
             def post_execution_hook(self, **kwargs):
                 # Add logic here for actions after execution, if needed
                 pass
-            
+
             def get_pod_env_vars(self):
                 # sets two env vars in the pod launched by Calrissian
                 return {"A": "1", "B": "1"}
@@ -73,7 +75,9 @@ class TestSentinel2Composites(unittest.TestCase):
                 password = os.getenv("CR_TOKEN", None)
                 registry = os.getenv("CR_ENDPOINT", None)
 
-                auth = base64.b64encode(f"{username}:{password}".encode("utf-8")).decode("utf-8")
+                auth = base64.b64encode(
+                    f"{username}:{password}".encode("utf-8")
+                ).decode("utf-8")
 
                 return {
                     "auths": {
@@ -88,12 +92,20 @@ class TestSentinel2Composites(unittest.TestCase):
                 return {
                     "ADES_STAGEOUT_AWS_SERVICEURL": os.getenv("AWS_SERVICE_URL", None),
                     "ADES_STAGEOUT_AWS_REGION": os.getenv("AWS_REGION", None),
-                    "ADES_STAGEOUT_AWS_ACCESS_KEY_ID": os.getenv("AWS_ACCESS_KEY_ID", None),
-                    "ADES_STAGEOUT_AWS_SECRET_ACCESS_KEY": os.getenv("AWS_SECRET_ACCESS_KEY", None),
+                    "ADES_STAGEOUT_AWS_ACCESS_KEY_ID": os.getenv(
+                        "AWS_ACCESS_KEY_ID", None
+                    ),
+                    "ADES_STAGEOUT_AWS_SECRET_ACCESS_KEY": os.getenv(
+                        "AWS_SECRET_ACCESS_KEY", None
+                    ),
                     "ADES_STAGEIN_AWS_SERVICEURL": os.getenv("AWS_SERVICE_URL", None),
                     "ADES_STAGEIN_AWS_REGION": os.getenv("AWS_REGION", None),
-                    "ADES_STAGEIN_AWS_ACCESS_KEY_ID": os.getenv("AWS_ACCESS_KEY_ID", None),
-                    "ADES_STAGEIN_AWS_SECRET_ACCESS_KEY": os.getenv("AWS_SECRET_ACCESS_KEY", None),
+                    "ADES_STAGEIN_AWS_ACCESS_KEY_ID": os.getenv(
+                        "AWS_ACCESS_KEY_ID", None
+                    ),
+                    "ADES_STAGEIN_AWS_SECRET_ACCESS_KEY": os.getenv(
+                        "AWS_SECRET_ACCESS_KEY", None
+                    ),
                     "ADES_STAGEOUT_OUTPUT": os.getenv("AWS_ACCESS_KEY_ID", None),
                 }
 
@@ -103,7 +115,9 @@ class TestSentinel2Composites(unittest.TestCase):
                     mode=0o777,
                     exist_ok=True,
                 )
-                with open(os.path.join(self.conf["tmpPath"], self.job_id, "job.log"), "w") as f:
+                with open(
+                    os.path.join(self.conf["tmpPath"], self.job_id, "job.log"), "w"
+                ) as f:
                     f.writelines(log)
 
                 with open(
@@ -112,7 +126,9 @@ class TestSentinel2Composites(unittest.TestCase):
                     json.dump(output, output_file, indent=4)
 
                 with open(
-                    os.path.join(self.conf["tmpPath"], self.job_id, "usage-report.json"),
+                    os.path.join(
+                        self.conf["tmpPath"], self.job_id, "usage-report.json"
+                    ),
                     "w",
                 ) as usage_report_file:
                     json.dump(usage_report, usage_report_file, indent=4)
@@ -140,7 +156,7 @@ class TestSentinel2Composites(unittest.TestCase):
         }
 
         outputs = {"Result": {"value": ""}}
-        #os.environ["KUBECONFIG"] = ".kube-config"
+        # os.environ["KUBECONFIG"] = ".kube-config"
 
         runner = ZooCalrissianRunner(
             cwl=self.cwl,

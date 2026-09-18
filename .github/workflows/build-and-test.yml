@@ -5,7 +5,7 @@ name: Build and Test
 
 on:
   push:
-    branches: [ "develop" ]
+    branches: [ "feature/zoo-calrissian-runner" ]
   pull_request:
     branches: [ "main" ]
 
@@ -31,6 +31,14 @@ jobs:
         sudo apt-get update -qy
         sudo apt-get install -y pipx
         pipx install hatch
+        pipx install ruff
+
+    - name: Ruff Check
+      run: ruff check .
+
+    - name: Ruff Format Check
+      run: ruff format --check .
+
     - name: Cache Hatch
       id: cache-hatch
       uses: actions/cache@v3

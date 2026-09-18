@@ -65,7 +65,7 @@ class TestRunnerResources(unittest.TestCase):
             def post_execution_hook(self):
                 # Add logic here for actions after execution, if needed
                 pass
-            
+
             def get_pod_env_vars(self):
                 # sets two env vars in the pod launched by Calrissian
                 return {"A": "1", "B": "1"}
@@ -79,7 +79,9 @@ class TestRunnerResources(unittest.TestCase):
                 email = os.environ["CR_EMAIL"]
                 registry = os.environ["CR_ENDPOINT"]
 
-                auth = base64.b64encode(f"{username}:{password}".encode("utf-8")).decode("utf-8")
+                auth = base64.b64encode(
+                    f"{username}:{password}".encode("utf-8")
+                ).decode("utf-8")
 
                 secret_config = {
                     "auths": {
@@ -119,7 +121,9 @@ class TestRunnerResources(unittest.TestCase):
                     mode=0o777,
                     exist_ok=True,
                 )
-                with open(os.path.join(self.conf["tmpPath"], self.job_id, "job.log"), "w") as f:
+                with open(
+                    os.path.join(self.conf["tmpPath"], self.job_id, "job.log"), "w"
+                ) as f:
                     f.writelines(log)
 
                 with open(
@@ -128,7 +132,9 @@ class TestRunnerResources(unittest.TestCase):
                     json.dump(output, output_file, indent=4)
 
                 with open(
-                    os.path.join(self.conf["tmpPath"], self.job_id, "usage-report.json"),
+                    os.path.join(
+                        self.conf["tmpPath"], self.job_id, "usage-report.json"
+                    ),
                     "w",
                 ) as usage_report_file:
                     json.dump(usage_report, usage_report_file, indent=4)

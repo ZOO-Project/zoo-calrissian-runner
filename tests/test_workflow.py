@@ -38,17 +38,25 @@ class TestWorkflow(unittest.TestCase):
             cls.reference_wf4 = {"cwl": yaml.safe_load(stream), "workflow_id": "main"}
 
     def test_object_creation(self):
-        workflow = Workflow(cwl=self.reference_wf1["cwl"], workflow_id=self.reference_wf1["workflow_id"])
+        workflow = Workflow(
+            cwl=self.reference_wf1["cwl"], workflow_id=self.reference_wf1["workflow_id"]
+        )
 
         self.assertIsInstance(workflow, Workflow)
 
     def test_get_workflow(self):
-        workflow = Workflow(cwl=self.reference_wf1["cwl"], workflow_id=self.reference_wf1["workflow_id"])
+        workflow = Workflow(
+            cwl=self.reference_wf1["cwl"], workflow_id=self.reference_wf1["workflow_id"]
+        )
 
-        self.assertIsInstance(workflow.get_workflow(), cwl_utils.parser.cwl_v1_2.Workflow)
+        self.assertIsInstance(
+            workflow.get_workflow(), cwl_utils.parser.cwl_v1_2.Workflow
+        )
 
     def test_workflow_hints(self):
-        workflow = Workflow(cwl=self.reference_wf4["cwl"], workflow_id=self.reference_wf4["workflow_id"])
+        workflow = Workflow(
+            cwl=self.reference_wf4["cwl"], workflow_id=self.reference_wf4["workflow_id"]
+        )
 
         self.assertDictEqual(
             {
@@ -65,7 +73,9 @@ class TestWorkflow(unittest.TestCase):
         )
 
     def test_workflow_requirements(self):
-        workflow = Workflow(cwl=self.reference_wf2["cwl"], workflow_id=self.reference_wf2["workflow_id"])
+        workflow = Workflow(
+            cwl=self.reference_wf2["cwl"], workflow_id=self.reference_wf2["workflow_id"]
+        )
 
         self.assertDictEqual(
             {
@@ -82,7 +92,9 @@ class TestWorkflow(unittest.TestCase):
         )
 
     def test_clt_requirements(self):
-        workflow = Workflow(cwl=self.reference_wf3["cwl"], workflow_id=self.reference_wf3["workflow_id"])
+        workflow = Workflow(
+            cwl=self.reference_wf3["cwl"], workflow_id=self.reference_wf3["workflow_id"]
+        )
 
         self.assertDictEqual(
             {
@@ -108,7 +120,9 @@ class TestWorkflow(unittest.TestCase):
         )
 
     def test_max_ram(self):
-        workflow = Workflow(cwl=self.reference_wf3["cwl"], workflow_id=self.reference_wf3["workflow_id"])
+        workflow = Workflow(
+            cwl=self.reference_wf3["cwl"], workflow_id=self.reference_wf3["workflow_id"]
+        )
 
         resources = workflow.eval_resource()
         max_ram = max(max(resources["ramMin"] or [0]), max(resources["ramMax"] or [0]))
@@ -116,28 +130,38 @@ class TestWorkflow(unittest.TestCase):
         self.assertEqual(max_ram, 20480)
 
     def test_max_cores(self):
-        workflow = Workflow(cwl=self.reference_wf3["cwl"], workflow_id=self.reference_wf3["workflow_id"])
+        workflow = Workflow(
+            cwl=self.reference_wf3["cwl"], workflow_id=self.reference_wf3["workflow_id"]
+        )
 
         resources = workflow.eval_resource()
-        max_cores = max(max(resources["coresMin"] or [0]), max(resources["coresMax"] or [0]))
+        max_cores = max(
+            max(resources["coresMin"] or [0]), max(resources["coresMax"] or [0])
+        )
 
         self.assertEqual(max_cores, 6)
 
     def test_volume_size(self):
-        workflow = Workflow(cwl=self.reference_wf4["cwl"], workflow_id=self.reference_wf4["workflow_id"])
+        workflow = Workflow(
+            cwl=self.reference_wf4["cwl"], workflow_id=self.reference_wf4["workflow_id"]
+        )
 
         resources = workflow.eval_resource()
-        volume_size = max(max(resources["tmpdirMin"] or [0]), max(resources["tmpdirMax"] or [0])) + max(
-            max(resources["outdirMin"] or [0]), max(resources["outdirMax"] or [0])
-        )
+        volume_size = max(
+            max(resources["tmpdirMin"] or [0]), max(resources["tmpdirMax"] or [0])
+        ) + max(max(resources["outdirMin"] or [0]), max(resources["outdirMax"] or [0]))
 
         self.assertEqual(volume_size, 20000)
 
     def test_default_resources(self):
-        workflow = Workflow(cwl=self.reference_wf1["cwl"], workflow_id=self.reference_wf1["workflow_id"])
+        workflow = Workflow(
+            cwl=self.reference_wf1["cwl"], workflow_id=self.reference_wf1["workflow_id"]
+        )
 
         resources = workflow.eval_resource()
-        max_cores = max(max(resources["coresMin"] or [0]), max(resources["coresMax"] or [0]))
+        max_cores = max(
+            max(resources["coresMin"] or [0]), max(resources["coresMax"] or [0])
+        )
 
         if max_cores == 0:
             max_cores = int(os.environ.get("DEFAULT_MAX_CORES"))

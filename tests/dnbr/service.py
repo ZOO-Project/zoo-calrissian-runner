@@ -36,7 +36,7 @@ class CalrissianRunnerExecutionHandler(ExecutionHandler):
     def post_execution_hook(self):
         # Add logic here for actions after execution, if needed
         pass
-    
+
     def get_pod_env_vars(self):
         # sets two env vars in the pod launched by Calrissian
         return {"A": "1", "B": "1"}
@@ -49,7 +49,9 @@ class CalrissianRunnerExecutionHandler(ExecutionHandler):
         password = os.getenv("CR_TOKEN", None)
         registry = os.getenv("CR_ENDPOINT", None)
 
-        auth = base64.b64encode(f"{username}:{password}".encode("utf-8")).decode("utf-8")
+        auth = base64.b64encode(f"{username}:{password}".encode("utf-8")).decode(
+            "utf-8"
+        )
 
         return {
             "auths": {
@@ -65,12 +67,18 @@ class CalrissianRunnerExecutionHandler(ExecutionHandler):
             "ADES_STAGEOUT_AWS_SERVICEURL": os.getenv("AWS_SERVICE_URL", None),
             "ADES_STAGEOUT_AWS_REGION": os.getenv("AWS_REGION", None),
             "ADES_STAGEOUT_AWS_ACCESS_KEY_ID": os.getenv("AWS_ACCESS_KEY_ID", None),
-            "ADES_STAGEOUT_AWS_SECRET_ACCESS_KEY": os.getenv("AWS_SECRET_ACCESS_KEY", None),
+            "ADES_STAGEOUT_AWS_SECRET_ACCESS_KEY": os.getenv(
+                "AWS_SECRET_ACCESS_KEY", None
+            ),
             "ADES_STAGEIN_AWS_SERVICEURL": os.getenv("AWS_SERVICE_URL", None),
             "ADES_STAGEIN_AWS_REGION": os.getenv("AWS_REGION", None),
             "ADES_STAGEIN_AWS_ACCESS_KEY_ID": os.getenv("AWS_ACCESS_KEY_ID", None),
-            "ADES_STAGEIN_AWS_SECRET_ACCESS_KEY": os.getenv("AWS_SECRET_ACCESS_KEY", None),
-            "ADES_STAGEOUT_OUTPUT": os.getenv("ADES_STAGEOUT_OUTPUT", "s3://eoepca-ades"),
+            "ADES_STAGEIN_AWS_SECRET_ACCESS_KEY": os.getenv(
+                "AWS_SECRET_ACCESS_KEY", None
+            ),
+            "ADES_STAGEOUT_OUTPUT": os.getenv(
+                "ADES_STAGEOUT_OUTPUT", "s3://eoepca-ades"
+            ),
         }
 
     def handle_outputs(self, log, output, usage_report, tool_logs):
@@ -82,7 +90,9 @@ class CalrissianRunnerExecutionHandler(ExecutionHandler):
         with open(os.path.join(self.conf["tmpPath"], self.job_id, "job.log"), "w") as f:
             f.writelines(log)
 
-        with open(os.path.join(self.conf["tmpPath"], self.job_id, "output.json"), "w") as output_file:
+        with open(
+            os.path.join(self.conf["tmpPath"], self.job_id, "output.json"), "w"
+        ) as output_file:
             json.dump(output, output_file, indent=4)
 
         with open(
@@ -98,7 +108,9 @@ class CalrissianRunnerExecutionHandler(ExecutionHandler):
             "log": os.path.join(self.job_id, "job.log"),
         }
 
-        with open(os.path.join(self.conf["tmpPath"], self.job_id, "report.json"), "w") as report_file:
+        with open(
+            os.path.join(self.conf["tmpPath"], self.job_id, "report.json"), "w"
+        ) as report_file:
             json.dump(aggregated_outputs, report_file, indent=4)
 
         self.conf["service_logs"] = [
@@ -111,6 +123,7 @@ class CalrissianRunnerExecutionHandler(ExecutionHandler):
         ]
 
         print(self.conf)
+
 
 @unittest.skipIf(os.getenv("CI_TEST_SKIP") == "1", "Test is skipped via env variable")
 def dnbr(conf, inputs, outputs):

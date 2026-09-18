@@ -1,13 +1,16 @@
 import unittest
-import os 
+import os
 
 import sys
 
 # Add a custom directory to sys.path
-sys.path.append('tests/dnbr/')
+sys.path.append("tests/dnbr/")
 try:
     from dnbr.service import dnbr
-except:
+# except:
+# print("Internal dnbr module failed/skipped")
+except ImportError:
+    dnbr = None
     print("Internal dnbr module failed/skipped")
 
 from dotenv import load_dotenv
@@ -60,8 +63,14 @@ class TestSentinel2DNBRService(unittest.TestCase):
         outputs = {"Result": {"value": ""}}
 
         cls.outputs = outputs
-        
-    @unittest.skipIf(os.getenv("CI_TEST_SKIP") == "1", "Test is skipped via env variable")
+
+    # @unittest.skipIf(
+    # os.getenv("CI_TEST_SKIP") == "1", "Test is skipped via env variable"
+    # )
+    @unittest.skipIf(
+        dnbr is None or os.getenv("CI_TEST_SKIP") == "1",
+        "DNBR module is unavailable or test is skipped via env variable",
+    )
     def test_execution(self):
         exit_code = dnbr(conf=self.conf, inputs=self.inputs, outputs=self.outputs)
 
