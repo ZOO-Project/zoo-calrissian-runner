@@ -25,7 +25,7 @@ class TestSentinel2BurnedArea(unittest.TestCase):
         except ImportError:
             print("Not running in zoo instance")
 
-            class ZooStub(object):
+            class ZooStub:
                 def __init__(self):
                     self.SERVICE_SUCCEEDED = 3
                     self.SERVICE_FAILED = 4
@@ -77,9 +77,9 @@ class TestSentinel2BurnedArea(unittest.TestCase):
                 password = os.getenv("CR_TOKEN", None)
                 registry = os.getenv("CR_ENDPOINT", None)
 
-                auth = base64.b64encode(
-                    f"{username}:{password}".encode("utf-8")
-                ).decode("utf-8")
+                auth = base64.b64encode(f"{username}:{password}".encode()).decode(
+                    "utf-8"
+                )
 
                 return {
                     "auths": {
@@ -149,10 +149,10 @@ class TestSentinel2BurnedArea(unittest.TestCase):
 
         inputs = {
             "pre_event": {
-                "value": "https://catalog.terradue.com/sentinel2/search?format=atom&uid=S2A_MSIL1C_20220628T112131_N0400_R037_T29SPD_20220628T145901&do=[terradue]"  # noqa: E501
+                "value": "https://catalog.terradue.com/sentinel2/search?format=atom&uid=S2A_MSIL1C_20220628T112131_N0400_R037_T29SPD_20220628T145901&do=[terradue]"
             },
             "post_event": {
-                "value": "https://catalog.terradue.com/sentinel2/search?format=atom&uid=S2B_MSIL1C_20220723T112119_N0400_R037_T29SPD_20220723T121256&do=[terradue]"  # noqa: E501
+                "value": "https://catalog.terradue.com/sentinel2/search?format=atom&uid=S2B_MSIL1C_20220723T112119_N0400_R037_T29SPD_20220723T121256&do=[terradue]"
             },
             "ndvi_threshold": {"value": "0.19"},
             "ndwi_threshold": {"value": "0.18"},

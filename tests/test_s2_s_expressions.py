@@ -25,7 +25,7 @@ class TestSentinel2SExpressions(unittest.TestCase):
         except ImportError:
             print("Not running in zoo instance")
 
-            class ZooStub(object):
+            class ZooStub:
                 def __init__(self):
                     self.SERVICE_SUCCEEDED = 3
                     self.SERVICE_FAILED = 4
@@ -77,9 +77,9 @@ class TestSentinel2SExpressions(unittest.TestCase):
                 password = os.getenv("CR_TOKEN", None)
                 registry = os.getenv("CR_ENDPOINT", None)
 
-                auth = base64.b64encode(
-                    f"{username}:{password}".encode("utf-8")
-                ).decode("utf-8")
+                auth = base64.b64encode(f"{username}:{password}".encode()).decode(
+                    "utf-8"
+                )
 
                 return {
                     "auths": {
@@ -149,8 +149,8 @@ class TestSentinel2SExpressions(unittest.TestCase):
 
         inputs = {
             "input_reference": {
-                "value": "https://catalog.terradue.com/sentinel2/search?format=atom&uid=S2A_MSIL1C_20220724T100041_N0400_R122_T33TUH_20220724T120137&do=[terradue]"  # noqa: E501
-            },  # noqa: E501
+                "value": "https://catalog.terradue.com/sentinel2/search?format=atom&uid=S2A_MSIL1C_20220724T100041_N0400_R122_T33TUH_20220724T120137&do=[terradue]"
+            },
             "s_expression": {"value": "(/ (- green red) (+ green red))"},
             "cbn": {"value": "ndvi"},
         }
@@ -197,9 +197,9 @@ class TestSentinel2SExpressions(unittest.TestCase):
                 email = ""
                 registry = "https://index.docker.io/v1/"
 
-                auth = base64.b64encode(
-                    f"{username}:{password}".encode("utf-8")
-                ).decode("utf-8")
+                auth = base64.b64encode(f"{username}:{password}".encode()).decode(
+                    "utf-8"
+                )
 
                 secret_config = {
                     "auths": {
@@ -209,7 +209,7 @@ class TestSentinel2SExpressions(unittest.TestCase):
                             "email": email,
                             "auth": auth,
                         },
-                        "registry.gitlab.com": {"auth": ""},  # noqa: E501
+                        "registry.gitlab.com": {"auth": ""},
                     }
                 }
 
@@ -272,8 +272,8 @@ class TestSentinel2SExpressions(unittest.TestCase):
         # cbn parameter not provided
         inputs = {
             "input_reference": {
-                "value": "https://catalog.terradue.com/sentinel2/search?format=atom&uid=S2A_MSIL1C_20220724T100041_N0400_R122_T33TUH_20220724T120137&do=[terradue]"  # noqa: E501
-            },  # noqa: E501
+                "value": "https://catalog.terradue.com/sentinel2/search?format=atom&uid=S2A_MSIL1C_20220724T100041_N0400_R122_T33TUH_20220724T120137&do=[terradue]"
+            },
             "s_expression": {"value": "(/ (- nir red) (+ nir red))"},
         }
 

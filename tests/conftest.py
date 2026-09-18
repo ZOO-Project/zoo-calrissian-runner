@@ -5,6 +5,7 @@ This file sets up the test environment, including paths to CWL wrapper assets.
 """
 
 import os
+
 import pytest
 from dotenv import load_dotenv
 

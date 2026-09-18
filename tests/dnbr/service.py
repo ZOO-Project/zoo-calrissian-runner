@@ -3,6 +3,7 @@ import json
 import os
 import pathlib
 import unittest
+
 import yaml
 from dotenv import load_dotenv
 
@@ -14,7 +15,7 @@ try:
     import zoo
 except ImportError:
 
-    class ZooStub(object):
+    class ZooStub:
         def __init__(self):
             self.SERVICE_SUCCEEDED = 3
             self.SERVICE_FAILED = 4
@@ -49,9 +50,7 @@ class CalrissianRunnerExecutionHandler(ExecutionHandler):
         password = os.getenv("CR_TOKEN", None)
         registry = os.getenv("CR_ENDPOINT", None)
 
-        auth = base64.b64encode(f"{username}:{password}".encode("utf-8")).decode(
-            "utf-8"
-        )
+        auth = base64.b64encode(f"{username}:{password}".encode()).decode("utf-8")
 
         return {
             "auths": {

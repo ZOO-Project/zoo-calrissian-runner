@@ -1,8 +1,8 @@
+import os
 import tempfile
 import unittest
 
 import yaml
-import os
 from cwl_utils.parser.cwl_v1_2 import Workflow
 
 from zoo_calrissian_runner import ZooCalrissianRunner
@@ -18,7 +18,7 @@ class TestCalrissianContext(unittest.TestCase):
         except ImportError:
             print("Not running in zoo instance")
 
-            class ZooStub(object):
+            class ZooStub:
                 def __init__(self):
                     self.SERVICE_SUCCEEDED = 3
                     self.SERVICE_FAILED = 4
@@ -59,11 +59,7 @@ class TestCalrissianContext(unittest.TestCase):
         self.assertEqual(self.zoo.SERVICE_SUCCEEDED, 3)
 
     def test_object_creation(self):
-        inputs = {
-            "mock_input": {
-                "value": "mock_input_val"  # noqa: E501
-            }
-        }
+        inputs = {"mock_input": {"value": "mock_input_val"}}
         outputs = {"Result": {"value": ""}}
         runner = ZooCalrissianRunner(
             cwl=self.cwl, conf=self.conf, inputs=inputs, outputs=outputs
@@ -187,7 +183,7 @@ class TestCalrissianContext(unittest.TestCase):
     def test_assert_all_parameters_missing(self):
         inputs = {
             "post_stac_item": {
-                "value": "https://earth-search.aws.element84.com/v0/collections/sentinel-s2-l2a-cogs/items/S2B_53HPA_20210723_0_L2A"  # noqa: E501
+                "value": "https://earth-search.aws.element84.com/v0/collections/sentinel-s2-l2a-cogs/items/S2B_53HPA_20210723_0_L2A"
             },
             "aoi": {"value": "136.659,-35.96,136.923,-35.791"},
         }
@@ -202,11 +198,11 @@ class TestCalrissianContext(unittest.TestCase):
     def test_assert_all_parameters(self):
         inputs = {
             "post_stac_item": {
-                "value": "https://earth-search.aws.element84.com/v0/collections/sentinel-s2-l2a-cogs/items/S2B_53HPA_20210723_0_L2A"  # noqa: E501
-            },  # noqa: E501
+                "value": "https://earth-search.aws.element84.com/v0/collections/sentinel-s2-l2a-cogs/items/S2B_53HPA_20210723_0_L2A"
+            },
             "pre_stac_item": {
-                "value": "https://earth-search.aws.element84.com/v0/collections/sentinel-s2-l2a-cogs/items/S2B_53HPA_20210703_0_L2A"  # noqa: E501
-            },  # noqa: E501
+                "value": "https://earth-search.aws.element84.com/v0/collections/sentinel-s2-l2a-cogs/items/S2B_53HPA_20210703_0_L2A"
+            },
             "aoi": {"value": "136.659,-35.96,136.923,-35.791"},
         }
         outputs = {"Result": {"value": ""}}

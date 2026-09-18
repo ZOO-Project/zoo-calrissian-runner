@@ -6,21 +6,29 @@ import os
 # import sys
 import uuid
 from datetime import datetime
-from typing import Union
+from io import StringIO
+# from typing import Union
 
 import attr
+import cwl_loader as _cwl_loader_module
 
-# import cwl_utils
-from eoap_cwlwrap import wrap
+# import cwl_utils.__meta__ as cwl_meta
+# import pathlib
+# import json
+import yaml
 
 # from eoap_cwlwrap import wrap_locations
 # from cwl_loader import dump_cwl
-from cwl_loader import dump_cwl_with_custom_requirements
-from cwl_loader import extract_dask_config
+from cwl_loader import (
+    dump_cwl_with_custom_requirements,
+    extract_dask_config,
+    load_cwl_from_location,
+)
 from cwl_loader import load_cwl_from_location as load_workflow
 from cwl_loader import load_cwl_from_yaml as load_cwl
-from cwl_loader import load_cwl_from_location
-import cwl_loader as _cwl_loader_module
+
+# import cwl_utils
+from eoap_cwlwrap import wrap
 
 # from cwl_utils.parser import save
 from loguru import logger
@@ -29,28 +37,20 @@ from pycalrissian.execution import CalrissianExecution
 from pycalrissian.job import CalrissianJob
 from pycalrissian.utils import copy_to_volume
 
-# import cwl_utils.__meta__ as cwl_meta
-# import pathlib
-# import json
-import yaml
-from io import StringIO
-
 # Import from zoo-runner-common
 # import os
-
 # Add zoo-runner-common to path (adjust based on installation)
 # import sys
 # sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../zoo-runner-common')))
 from zoo_runner_common.base_runner import BaseRunner
-
-from zoo_runner_common.zoo_conf import ZooConf, ZooInputs, ZooOutputs, CWLWorkflow
+from zoo_runner_common.zoo_conf import CWLWorkflow, ZooConf, ZooInputs, ZooOutputs
 
 __all__ = [
     "CWLWorkflow",
+    "ExecutionHandler",
     "ZooConf",
     "ZooInputs",
     "ZooOutputs",
-    "ExecutionHandler",
 ]
 
 from zoo_calrissian_runner.handlers import ExecutionHandler
@@ -91,7 +91,7 @@ class ZooCalrissianRunner(BaseRunner):
         conf,
         inputs,
         outputs,
-        execution_handler: Union[ExecutionHandler, None] = None,
+        execution_handler: ExecutionHandler | None = None,
     ):
         # BaseRunner.__init__ creates: self.conf, self.inputs, self.outputs, self.workflow
         super().__init__(cwl, inputs, conf, outputs, execution_handler)
@@ -348,10 +348,10 @@ class ZooCalrissianRunner(BaseRunner):
 
         # Add Dask Gateway configuration if available
         if dask_config is not None:
-            if "gateway_url" in dask_config and dask_config["gateway_url"]:
+            if dask_config.get("gateway_url"):
                 job_kwargs["dask_gateway_url"] = dask_config["gateway_url"]
                 logger.info(f"Setting Dask Gateway URL: {dask_config['gateway_url']}")
-            if "configmap" in dask_config and dask_config["configmap"]:
+            if dask_config.get("configmap"):
                 job_kwargs["dask_script_configmap"] = dask_config["configmap"]
                 logger.info(
                     f"Setting Dask script configmap: {dask_config['configmap']}"

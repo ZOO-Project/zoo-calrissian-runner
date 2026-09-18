@@ -5,10 +5,10 @@ import tempfile
 import unittest
 
 import yaml
+from dotenv import load_dotenv
 
 from zoo_calrissian_runner import ZooCalrissianRunner
 from zoo_calrissian_runner.handlers import ExecutionHandler
-from dotenv import load_dotenv
 
 load_dotenv()
 
@@ -23,7 +23,7 @@ class TestSentinel2Composites(unittest.TestCase):
         except ImportError:
             print("Not running in zoo instance")
 
-            class ZooStub(object):
+            class ZooStub:
                 def __init__(self):
                     self.SERVICE_SUCCEEDED = 3
                     self.SERVICE_FAILED = 4
@@ -75,9 +75,9 @@ class TestSentinel2Composites(unittest.TestCase):
                 password = os.getenv("CR_TOKEN", None)
                 registry = os.getenv("CR_ENDPOINT", None)
 
-                auth = base64.b64encode(
-                    f"{username}:{password}".encode("utf-8")
-                ).decode("utf-8")
+                auth = base64.b64encode(f"{username}:{password}".encode()).decode(
+                    "utf-8"
+                )
 
                 return {
                     "auths": {
@@ -147,11 +147,11 @@ class TestSentinel2Composites(unittest.TestCase):
 
         inputs = {
             "post_stac_item": {
-                "value": "https://earth-search.aws.element84.com/v0/collections/sentinel-s2-l2a-cogs/items/S2B_53HPA_20210723_0_L2A"  # noqa: E501
-            },  # noqa: E501
+                "value": "https://earth-search.aws.element84.com/v0/collections/sentinel-s2-l2a-cogs/items/S2B_53HPA_20210723_0_L2A"
+            },
             "pre_stac_item": {
-                "value": "https://earth-search.aws.element84.com/v0/collections/sentinel-s2-l2a-cogs/items/S2B_53HPA_20210703_0_L2A"  # noqa: E501
-            },  # noqa: E501
+                "value": "https://earth-search.aws.element84.com/v0/collections/sentinel-s2-l2a-cogs/items/S2B_53HPA_20210703_0_L2A"
+            },
             "aoi": {"value": "136.659,-35.96,136.923,-35.791"},
         }
 
