@@ -7,8 +7,8 @@ import os
 import uuid
 from datetime import datetime
 from io import StringIO
-# from typing import Union
 
+# from typing import Union
 import attr
 import cwl_loader as _cwl_loader_module
 
@@ -52,7 +52,6 @@ __all__ = [
     "ZooInputs",
     "ZooOutputs",
 ]
-
 from zoo_calrissian_runner.handlers import ExecutionHandler
 
 
