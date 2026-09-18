@@ -43,7 +43,16 @@ from io import StringIO
 # sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../zoo-runner-common')))
 from zoo_runner_common.base_runner import BaseRunner
 
-# from zoo_runner_common.zoo_conf import ZooConf, ZooInputs, ZooOutputs, CWLWorkflow
+from zoo_runner_common.zoo_conf import ZooConf, ZooInputs, ZooOutputs, CWLWorkflow
+
+__all__ = [
+    "CWLWorkflow",
+    "ZooConf",
+    "ZooInputs",
+    "ZooOutputs",
+    "ExecutionHandler",
+]
+
 from zoo_calrissian_runner.handlers import ExecutionHandler
 
 
