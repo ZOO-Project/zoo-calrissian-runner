@@ -1,6 +1,7 @@
 import base64
 import json
 import os
+
 # import tempfile
 import unittest
 
@@ -16,7 +17,7 @@ load_dotenv()
 class TestRunnerResources(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        #tempfile is then no longer used
+        # tempfile is then no longer used
         # cls.temp_output_file = tempfile.NamedTemporaryFile()
 
         try:

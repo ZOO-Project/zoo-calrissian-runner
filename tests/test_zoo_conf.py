@@ -12,7 +12,7 @@ from zoo_calrissian_runner import ZooCalrissianRunner
 class TestCalrissianContext(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        #tempfile is then no longer used
+        # tempfile is then no longer used
         # cls.temp_output_file = tempfile.NamedTemporaryFile()
 
         try:

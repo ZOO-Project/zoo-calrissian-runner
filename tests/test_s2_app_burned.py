@@ -19,7 +19,7 @@ from zoo_calrissian_runner.handlers import ExecutionHandler
 class TestSentinel2BurnedArea(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        #tempfile is then no longer used
+        # tempfile is then no longer used
         # cls.temp_output_file = tempfile.NamedTemporaryFile()
 
         try:
