@@ -5,7 +5,7 @@ import os
 
 # import sys
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from io import StringIO
 
 # from typing import Union
@@ -130,18 +130,14 @@ class ZooCalrissianRunner(BaseRunner):
         if self._namespace_name is None:
             return self.shorten_namespace(
                 f"{str(self.zoo_conf.workflow_id).replace('_', '-')}-"
-                f"{str(datetime.now().timestamp()).replace('.', '')}-{uuid.uuid4()}"
+                f"{str(datetime.now(timezone.utc).timestamp()).replace('.', '')}-{uuid.uuid4()}"
             )
         else:
             return self._namespace_name
 
     def get_annotations(self):
         """Get the labels for the execution."""
-        return (
-            self.zoo_conf.conf["pod_annotations"]
-            if "pod_annotations" in self.zoo_conf.conf
-            else None
-        )
+        return self.zoo_conf.conf.get("pod_annotations")
 
     def execute(self, wall_time=None):
         self.update_status(progress=2, message="Pre-execution hook")
@@ -190,7 +186,7 @@ class ZooCalrissianRunner(BaseRunner):
                     logger.info(
                         "No Dask Gateway configuration found in custom requirements - Dask support disabled"
                     )
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 logger.warning(f"Could not load CWL from {app_package_path}: {e}")
                 dask_config = None
         else:
@@ -305,26 +301,26 @@ class ZooCalrissianRunner(BaseRunner):
 
         # Upload input complex data into calrissian_wdir
         for i in processing_parameters:
-            if isinstance(processing_parameters[i], dict):
-                if processing_parameters[i].get("class", None) == "File":
-                    copy_to_volume(
-                        context=session,
-                        volume={
-                            "name": session.calrissian_wdir,
-                            "persistentVolumeClaim": {
-                                "claimName": session.calrissian_wdir
-                            },
-                        },
-                        volume_mount={
-                            "name": session.calrissian_wdir,
-                            "mountPath": "/calrissian",
-                        },
-                        source_paths=[processing_parameters[i]["path"]],
-                        destination_path="/calrissian",
-                    )
-                    processing_parameters[i]["path"] = processing_parameters[i][
-                        "path"
-                    ].replace(self.zoo_conf.conf["main"]["tmpPath"], "/calrissian")
+            if (
+                isinstance(processing_parameters[i], dict)
+                and processing_parameters[i].get("class") == "File"
+            ):
+                copy_to_volume(
+                    context=session,
+                    volume={
+                        "name": session.calrissian_wdir,
+                        "persistentVolumeClaim": {"claimName": session.calrissian_wdir},
+                    },
+                    volume_mount={
+                        "name": session.calrissian_wdir,
+                        "mountPath": "/calrissian",
+                    },
+                    source_paths=[processing_parameters[i]["path"]],
+                    destination_path="/calrissian",
+                )
+                processing_parameters[i]["path"] = processing_parameters[i][
+                    "path"
+                ].replace(self.zoo_conf.conf["main"]["tmpPath"], "/calrissian")
 
         logger.info("create Calrissian job")
         self.update_status(progress=21, message="Submit execution")
@@ -421,7 +417,7 @@ class ZooCalrissianRunner(BaseRunner):
     def load_a_workflow(self, location):
         try:
             workflow = load_workflow(location)
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error(f"Cannot load CWL from {location}: {e}")
             workflow = None
         return workflow
@@ -454,7 +450,7 @@ class ZooCalrissianRunner(BaseRunner):
                 logger.info(
                     f"Saved custom requirements cache: {list(saved_cache.keys())}"
                 )
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 logger.warning(
                     f"Could not load from {app_package_path}: {e}, using self.workflow.cwl"
                 )
@@ -544,6 +540,6 @@ class ZooCalrissianRunner(BaseRunner):
             wf = yaml.safe_load(stream.getvalue())
         except Exception as e:
             logger.error(f"Cannot wrap CWL: {e}")
-            raise e
+            raise
 
         return wf

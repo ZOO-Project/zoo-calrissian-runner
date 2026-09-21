@@ -194,6 +194,7 @@ Catch specific exceptions and use structured logging via `loguru`:
 ```python
 from loguru import logger
 
+
 def load_config(self, path: str) -> dict:
     """Load configuration from a YAML file."""
     try:
@@ -224,8 +225,8 @@ Place unit tests under `tests/` and name files `test_*.py`:
 import unittest
 from zoo_calrissian_runner import ZooCalrissianRunner
 
-class TestZooCalrissianRunner(unittest.TestCase):
 
+class TestZooCalrissianRunner(unittest.TestCase):
     def test_initialization(self):
         """Test that the runner initializes correctly."""
         conf = {"lenv": {"message": ""}}

@@ -1,7 +1,8 @@
 import base64
 import json
 import os
-import tempfile
+
+# import tempfile
 import unittest
 
 import yaml
@@ -18,7 +19,8 @@ from zoo_calrissian_runner.handlers import ExecutionHandler
 class TestSentinel2SExpressions(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.temp_output_file = tempfile.NamedTemporaryFile()
+        #tempfile is then no longer used
+        # cls.temp_output_file = tempfile.NamedTemporaryFile()
 
         try:
             import zoo

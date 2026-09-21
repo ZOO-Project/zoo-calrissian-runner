@@ -1,5 +1,6 @@
 import os
-import tempfile
+
+# import tempfile
 import unittest
 
 import yaml
@@ -11,7 +12,8 @@ from zoo_calrissian_runner import ZooCalrissianRunner
 class TestCalrissianContext(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.temp_output_file = tempfile.NamedTemporaryFile()
+        #tempfile is then no longer used
+        # cls.temp_output_file = tempfile.NamedTemporaryFile()
 
         try:
             import zoo
@@ -153,7 +155,7 @@ class TestCalrissianContext(unittest.TestCase):
         )
 
         self.assertEqual(
-            set(["pre_stac_item", "post_stac_item", "aoi", "bands"]),
+            {"pre_stac_item", "post_stac_item", "aoi", "bands"},
             set(runner.workflow.get_workflow_inputs()),
         )
 
@@ -165,7 +167,7 @@ class TestCalrissianContext(unittest.TestCase):
         )
 
         self.assertEqual(
-            set(["pre_stac_item", "post_stac_item", "aoi", "bands"]),
+            {"pre_stac_item", "post_stac_item", "aoi", "bands"},
             set(runner.get_workflow_inputs()),
         )
 
@@ -177,7 +179,7 @@ class TestCalrissianContext(unittest.TestCase):
         )
         self.assertTrue(
             set(runner.get_workflow_inputs(mandatory=True)),
-            set(["pre_stac_item", "post_stac_item"]),
+            {"pre_stac_item", "post_stac_item"},
         )
 
     def test_assert_all_parameters_missing(self):
