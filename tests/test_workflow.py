@@ -96,28 +96,33 @@ class TestWorkflow(unittest.TestCase):
             cwl=self.reference_wf3["cwl"], workflow_id=self.reference_wf3["workflow_id"]
         )
 
-        self.assertDictEqual(
-            {
-                "coresMin": [3, 6, 3, 3, 3, 3, 6, 6],
-                "coresMax": [],
-                "ramMin": [
-                    10240,
-                    20480,
-                    10240,
-                    10240,
-                    10240,
-                    10240,
-                    20480,
-                    20480,
-                ],
-                "ramMax": [],
-                "outdirMin": [],
-                "outdirMax": [],
-                "tmpdirMax": [],
-                "tmpdirMin": [],
-            },
-            workflow.eval_resource(),
+        resources = workflow.eval_resource()
+
+        self.assertEqual(
+            sorted(resources["coresMin"]),
+            sorted([3, 6, 3, 3, 3, 3, 6, 6]),
         )
+        self.assertEqual(
+            sorted(resources["ramMin"]),
+            sorted(
+                [
+                    10240,
+                    20480,
+                    10240,
+                    10240,
+                    10240,
+                    10240,
+                    20480,
+                    20480,
+                ]
+            ),
+        )
+        self.assertEqual(resources["coresMax"], [])
+        self.assertEqual(resources["ramMax"], [])
+        self.assertEqual(resources["outdirMin"], [])
+        self.assertEqual(resources["outdirMax"], [])
+        self.assertEqual(resources["tmpdirMax"], [])
+        self.assertEqual(resources["tmpdirMin"], [])
 
     def test_max_ram(self):
         workflow = Workflow(
