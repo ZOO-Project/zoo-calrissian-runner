@@ -64,8 +64,34 @@ jobs:
         echo "KUBECONFIG=$HOME/.kube/config" >> $GITHUB_ENV
         py3_path=$(which python3)
         echo "HATCH_PYTHON_PATH=$py3_path" >> $GITHUB_ENV
-        echo "CI_TEST_SKIP=1" >> $GITHUB_ENV
+    # Deploy an S3-compatible endpoint (LocalStack) in-cluster: the
+    # integration tests stage results out to S3 (see tests/.env), and
+    # tests/conftest.py points AWS_SERVICE_URL at this Service.
+    - name: Set up Helm
+      uses: azure/setup-helm@v4
+    # LocalStack requires a LOCALSTACK_AUTH_TOKEN (ZOO-Project has a free
+    # open-source license for it). The token itself never lives in this
+    # repo: it's stored as the repository secret LOCALSTACK_AUTH_TOKEN
+    # (Settings > Secrets and variables > Actions) and only materialized
+    # here as a Kubernetes Secret, which localstack-values.yaml pulls in
+    # via envFrom. See docs/localstack.md for how to set/rotate it.
+    - name: Create LocalStack auth secret
+      run: |
+        kubectl create namespace eoap-zoo-project --dry-run=client -o yaml | kubectl apply -f -
+        kubectl create secret generic localstack-auth \
+          --namespace eoap-zoo-project \
+          --from-literal=LOCALSTACK_AUTH_TOKEN="${{ secrets.LOCALSTACK_AUTH_TOKEN }}" \
+          --dry-run=client -o yaml | kubectl apply -f -
+    - name: Deploy LocalStack (S3)
+      run: |
+        helm repo add localstack https://helm.localstack.cloud
+        helm repo update
+        helm install eoap-zoo-project-localstack localstack/localstack \
+          --version 0.7.0 \
+          --namespace eoap-zoo-project --create-namespace \
+          --values .github/ci/localstack-values.yaml \
+          --wait --timeout 5m
     - name: Run Tests with Hatch
       run: |
         #hatch run test.py310:cov
-        hatch -e test run nose2
+        hatch -e test run pytest
