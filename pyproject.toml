@@ -33,7 +33,7 @@ dependencies = [
     "attrs",
     "loguru",
     "setuptools",
-    "kubernetes>=28.1.0",
+    "kubernetes>=34.1.0",
     "cwltool",
     "zoo-framework"
 ]
