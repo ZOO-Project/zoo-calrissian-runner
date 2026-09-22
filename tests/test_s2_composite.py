@@ -108,7 +108,7 @@ class TestSentinel2Composites(unittest.TestCase):
                     "ADES_STAGEIN_AWS_SECRET_ACCESS_KEY": os.getenv(
                         "AWS_SECRET_ACCESS_KEY", None
                     ),
-                    "ADES_STAGEOUT_OUTPUT": os.getenv("AWS_ACCESS_KEY_ID", None),
+                    "ADES_STAGEOUT_OUTPUT": os.getenv("ADES_STAGEOUT_OUTPUT", None),
                 }
 
             def handle_outputs(self, log, output, usage_report, tool_logs):
@@ -168,7 +168,7 @@ class TestSentinel2Composites(unittest.TestCase):
             execution_handler=CalrissianRunnerExecutionHandler(conf=self.conf),
         )
 
-        exit_value = runner.execute(wall_time=120)
+        exit_value = runner.execute(wall_time=600)
 
         print(f"exit value: {exit_value}")
 

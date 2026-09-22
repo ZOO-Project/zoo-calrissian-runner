@@ -110,7 +110,7 @@ class TestSentinel2SExpressions(unittest.TestCase):
                     "ADES_STAGEIN_AWS_SECRET_ACCESS_KEY": os.getenv(
                         "AWS_SECRET_ACCESS_KEY", None
                     ),
-                    "ADES_STAGEOUT_OUTPUT": os.getenv("AWS_ACCESS_KEY_ID", None),
+                    "ADES_STAGEOUT_OUTPUT": os.getenv("ADES_STAGEOUT_OUTPUT", None),
                 }
 
             def handle_outputs(self, log, output, usage_report, tool_logs):
@@ -151,7 +151,7 @@ class TestSentinel2SExpressions(unittest.TestCase):
 
         inputs = {
             "input_reference": {
-                "value": "https://catalog.terradue.com/sentinel2/search?format=atom&uid=S2A_MSIL1C_20220724T100041_N0400_R122_T33TUH_20220724T120137&do=[terradue]"
+                "value": "https://earth-search.aws.element84.com/v0/collections/sentinel-s2-l2a-cogs/items/S2A_33TUH_20220724_0_L2A"
             },
             "s_expression": {"value": "(/ (- green red) (+ green red))"},
             "cbn": {"value": "ndvi"},
@@ -274,7 +274,7 @@ class TestSentinel2SExpressions(unittest.TestCase):
         # cbn parameter not provided
         inputs = {
             "input_reference": {
-                "value": "https://catalog.terradue.com/sentinel2/search?format=atom&uid=S2A_MSIL1C_20220724T100041_N0400_R122_T33TUH_20220724T120137&do=[terradue]"
+                "value": "https://earth-search.aws.element84.com/v0/collections/sentinel-s2-l2a-cogs/items/S2A_33TUH_20220724_0_L2A"
             },
             "s_expression": {"value": "(/ (- nir red) (+ nir red))"},
         }
