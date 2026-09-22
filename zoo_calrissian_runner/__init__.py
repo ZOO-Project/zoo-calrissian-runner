@@ -446,7 +446,6 @@ class ZooCalrissianRunner(BaseRunner):
                 # Save cache immediately: subsequent load_cwl calls (for stage-in/out)
                 # will clear the global cache since they run at depth 0.
                 saved_cache = dict(_cwl_loader_module._custom_requirements_cache)
-                saved_namespaces = dict(_cwl_loader_module._original_namespaces)
                 logger.info(
                     f"Saved custom requirements cache: {list(saved_cache.keys())}"
                 )
@@ -456,14 +455,12 @@ class ZooCalrissianRunner(BaseRunner):
                 )
                 cwl_with_customs = self.workflow.cwl
                 saved_cache = {}
-                saved_namespaces = {}
         else:
             logger.warning(
                 "No auth_env/cwd found, using self.workflow.cwl without customs"
             )
             cwl_with_customs = self.workflow.cwl
             saved_cache = {}
-            saved_namespaces = {}
 
         # Get the workflow object
         workflow = self.workflow.get_workflow()
@@ -535,7 +532,6 @@ class ZooCalrissianRunner(BaseRunner):
                 process=wrapped_workflow,
                 stream=stream,
                 custom_requirements_cache=saved_cache,
-                original_namespaces=saved_namespaces,
             )
             wf = yaml.safe_load(stream.getvalue())
         except Exception as e:
