@@ -96,7 +96,7 @@ dependencies = [
 skip-install = false
 
 dependencies = [
-    "nose2",
+    "pytest",
     "coverage",
     "pycalrissian",
     "eoap_cwlwrap @ git+https://github.com/GeoLabs/eoap-cwlwrap.git@feature/add-file-stageout-support",
@@ -116,12 +116,15 @@ PIP_EXTRA_INDEX_URL = "https://test.pypi.org/simple/"
 RETRY_ATTEMPTS="0"
 
 [tool.hatch.envs.test.scripts]
-test = "hatch run nose2"
-testv = "hatch run nose2 --verbose"
-cov = ["coverage run --source=zoo_calrissian_runner -m nose2", "coverage report"]
+test = "pytest {args}"
+testv = "pytest -v {args}"
+cov = ["coverage run --source=zoo_calrissian_runner -m pytest {args}", "coverage report"]
 
 [[tool.hatch.envs.test.matrix]]
 python = ["3.10", "3.11", "3.12"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
 
 [tool.hatch.envs.docs]
 skip-install = false
