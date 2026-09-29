@@ -101,7 +101,7 @@ dependencies = [
 # but hasn't been released, so force-install that commit too, with --no-deps
 # to skip its own stale pin.
 post-install-commands = [
-    "pip install --force-reinstall git+https://github.com/GeoLabs/cwl-loader.git@feature/merge-remote-main",
+    "pip install --force-reinstall git+https://github.com/GeoLabs/cwl-loader.git@feature/merged-patch",
     "pip install --force-reinstall --no-deps git+https://github.com/ZOO-Project/pycalrissian.git@aee352268500bc97a79a43022ea82398e3d9e0dc",
 ]
 
@@ -125,7 +125,7 @@ dependencies = [
 ]
 # See tool.hatch.envs.default's post-install-commands comment above.
 post-install-commands = [
-    "pip install --force-reinstall git+https://github.com/GeoLabs/cwl-loader.git@feature/merge-remote-main",
+    "pip install --force-reinstall git+https://github.com/GeoLabs/cwl-loader.git@feature/merged-patch",
     "pip install --force-reinstall --no-deps git+https://github.com/ZOO-Project/pycalrissian.git@aee352268500bc97a79a43022ea82398e3d9e0dc",
 ]
 
@@ -137,7 +137,7 @@ RETRY_ATTEMPTS="0"
 # hatch re-syncs the declared dependencies (reverting cwl-loader and
 # pycalrissian to the versions eoap-cwlwrap/PyPI pin) on every `hatch run`,
 # undoing post-install-commands - so both overrides are repeated here too.
-_pin-cwl-loader-fork = "pip install --force-reinstall --no-deps git+https://github.com/GeoLabs/cwl-loader.git@feature/merge-remote-main"
+_pin-cwl-loader-fork = "pip install --force-reinstall --no-deps git+https://github.com/GeoLabs/cwl-loader.git@feature/merged-patch"
 _pin-pycalrissian-fix = "pip install --force-reinstall --no-deps git+https://github.com/ZOO-Project/pycalrissian.git@aee352268500bc97a79a43022ea82398e3d9e0dc"
 test = ["_pin-cwl-loader-fork", "_pin-pycalrissian-fix", "pytest {args}"]
 testv = ["_pin-cwl-loader-fork", "_pin-pycalrissian-fix", "pytest -v {args}"]
