@@ -537,14 +537,11 @@ class ZooCalrissianRunner(BaseRunner):
                     f"Process '{process_to_wrap}' not found in the loaded CWL document"
                 )
 
-            # Wrap with the CWL that has customs. wrap() only returns the
-            # orchestrator Workflow, with its steps' run: fields as bare
-            # "#id" references into sibling $graph processes - it is not
-            # self-contained on its own. eoap_cwlwrap's own wrap_locations()
-            # helper assembles the full $graph (stage-in/out + orchestrator +
-            # original workflow processes) before dumping; replicate that
-            # here since we need the customs-carrying process objects, not
-            # wrap_locations()'s location-loaded ones.
+            # wrap() returns only the orchestrator Workflow, whose steps
+            # reference the stage-in/out processes and the original
+            # workflow by ID. Assemble the complete graph here before
+            # dumping, while preserving the process objects loaded with
+            # custom requirements.
             wrapped_workflow = wrap(
                 workflow=workflow_to_wrap,
                 directory_stage_in=directory_stage_in_cwl,
