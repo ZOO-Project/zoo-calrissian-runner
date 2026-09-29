@@ -23,6 +23,7 @@ from cwl_loader import (
     dump_cwl_with_custom_requirements,
     extract_dask_config,
     load_cwl_from_location,
+    order_graph_by_dependencies,
 )
 from cwl_loader import load_cwl_from_location as load_workflow
 from cwl_loader import load_cwl_from_yaml as load_cwl
@@ -517,19 +518,63 @@ class ZooCalrissianRunner(BaseRunner):
             file_stage_out_cwl = self.load_a_workflow(file_stage_out_path)
 
         try:
-            # Wrap with the CWL that has customs
+            # eoap_cwlwrap's official wrap() takes a single, already-resolved
+            # process (no more workflows=/workflow_id=): find the process_to_wrap
+            # entry point within cwl_with_customs so custom requirements stay
+            # attached (self.workflow.get_workflow() returns an equivalent but
+            # distinct object, parsed without customs).
+            candidates = (
+                cwl_with_customs
+                if isinstance(cwl_with_customs, list)
+                else [cwl_with_customs]
+            )
+            workflow_to_wrap = next(
+                (p for p in candidates if getattr(p, "id", None) == process_to_wrap),
+                None,
+            )
+            if workflow_to_wrap is None:
+                raise ValueError(
+                    f"Process '{process_to_wrap}' not found in the loaded CWL document"
+                )
+
+            # wrap() returns only the orchestrator Workflow, whose steps
+            # reference the stage-in/out processes and the original
+            # workflow by ID. Assemble the complete graph here before
+            # dumping, while preserving the process objects loaded with
+            # custom requirements.
             wrapped_workflow = wrap(
-                workflows=cwl_with_customs,
-                workflow_id=process_to_wrap,
+                workflow=workflow_to_wrap,
                 directory_stage_in=directory_stage_in_cwl,
                 file_stage_in=file_stage_in_cwl,
                 directory_stage_out=directory_stage_out_cwl,
                 file_stage_out=file_stage_out_cwl,
             )
+            # eoap_cwlwrap's orchestrator Workflow never gets cwlVersion set
+            # (it stays None), so the dumped document is missing it entirely
+            # and cwltool/calrissian rejects it with "No cwlVersion found".
+            wrapped_workflow.cwlVersion = workflow_to_wrap.cwlVersion
+
+            full_graph = []
+            for part in (
+                directory_stage_in_cwl,
+                file_stage_in_cwl,
+                wrapped_workflow,
+                candidates,
+                directory_stage_out_cwl,
+                file_stage_out_cwl,
+            ):
+                if part is None:
+                    continue
+                if isinstance(part, list):
+                    full_graph.extend(part)
+                else:
+                    full_graph.append(part)
+            full_graph = order_graph_by_dependencies(processes=full_graph)
+
             stream = StringIO()
             # Pass the saved cache explicitly: stage-in/out loads above cleared the global cache
             dump_cwl_with_custom_requirements(
-                process=wrapped_workflow,
+                process=full_graph,
                 stream=stream,
                 custom_requirements_cache=saved_cache,
             )
