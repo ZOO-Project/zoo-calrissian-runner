@@ -1,7 +1,8 @@
 import base64
 import json
 import os
-import tempfile
+
+# import tempfile
 import unittest
 
 import yaml
@@ -16,14 +17,15 @@ load_dotenv()
 class TestRunnerResources(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.temp_output_file = tempfile.NamedTemporaryFile()
+        # tempfile is then no longer used
+        # cls.temp_output_file = tempfile.NamedTemporaryFile()
 
         try:
             import zoo
         except ImportError:
             print("Not running in zoo instance")
 
-            class ZooStub(object):
+            class ZooStub:
                 def __init__(self):
                     self.SERVICE_SUCCEEDED = 3
                     self.SERVICE_FAILED = 4
@@ -65,7 +67,7 @@ class TestRunnerResources(unittest.TestCase):
             def post_execution_hook(self):
                 # Add logic here for actions after execution, if needed
                 pass
-            
+
             def get_pod_env_vars(self):
                 # sets two env vars in the pod launched by Calrissian
                 return {"A": "1", "B": "1"}
@@ -79,7 +81,9 @@ class TestRunnerResources(unittest.TestCase):
                 email = os.environ["CR_EMAIL"]
                 registry = os.environ["CR_ENDPOINT"]
 
-                auth = base64.b64encode(f"{username}:{password}".encode("utf-8")).decode("utf-8")
+                auth = base64.b64encode(f"{username}:{password}".encode()).decode(
+                    "utf-8"
+                )
 
                 secret_config = {
                     "auths": {
@@ -89,7 +93,7 @@ class TestRunnerResources(unittest.TestCase):
                             "email": email,
                             "auth": auth,
                         },
-                        "registry.gitlab.com": {"auth": ""},  # noqa: E501
+                        "registry.gitlab.com": {"auth": ""},
                     }
                 }
 
@@ -119,7 +123,9 @@ class TestRunnerResources(unittest.TestCase):
                     mode=0o777,
                     exist_ok=True,
                 )
-                with open(os.path.join(self.conf["tmpPath"], self.job_id, "job.log"), "w") as f:
+                with open(
+                    os.path.join(self.conf["tmpPath"], self.job_id, "job.log"), "w"
+                ) as f:
                     f.writelines(log)
 
                 with open(
@@ -128,7 +134,9 @@ class TestRunnerResources(unittest.TestCase):
                     json.dump(output, output_file, indent=4)
 
                 with open(
-                    os.path.join(self.conf["tmpPath"], self.job_id, "usage-report.json"),
+                    os.path.join(
+                        self.conf["tmpPath"], self.job_id, "usage-report.json"
+                    ),
                     "w",
                 ) as usage_report_file:
                     json.dump(usage_report, usage_report_file, indent=4)
@@ -152,10 +160,10 @@ class TestRunnerResources(unittest.TestCase):
     def test_empty_resource_definition(self):
         inputs = {
             "pre_event": {
-                "value": "https://catalog.terradue.com/sentinel2/search?format=atom&uid=S2A_MSIL1C_20220628T112131_N0400_R037_T29SPD_20220628T145901&do=[terradue]"  # noqa: E501
+                "value": "https://catalog.terradue.com/sentinel2/search?format=atom&uid=S2A_MSIL1C_20220628T112131_N0400_R037_T29SPD_20220628T145901&do=[terradue]"
             },
             "post_event": {
-                "value": "https://catalog.terradue.com/sentinel2/search?format=atom&uid=S2B_MSIL1C_20220723T112119_N0400_R037_T29SPD_20220723T121256&do=[terradue]"  # noqa: E501
+                "value": "https://catalog.terradue.com/sentinel2/search?format=atom&uid=S2B_MSIL1C_20220723T112119_N0400_R037_T29SPD_20220723T121256&do=[terradue]"
             },
             "ndvi_threshold": {"value": "0.19"},
             "ndwi_threshold": {"value": "0.18"},
@@ -176,10 +184,10 @@ class TestRunnerResources(unittest.TestCase):
     def test_volume_size(self):
         inputs = {
             "pre_event": {
-                "value": "https://catalog.terradue.com/sentinel2/search?format=atom&uid=S2A_MSIL1C_20220628T112131_N0400_R037_T29SPD_20220628T145901&do=[terradue]"  # noqa: E501
+                "value": "https://catalog.terradue.com/sentinel2/search?format=atom&uid=S2A_MSIL1C_20220628T112131_N0400_R037_T29SPD_20220628T145901&do=[terradue]"
             },
             "post_event": {
-                "value": "https://catalog.terradue.com/sentinel2/search?format=atom&uid=S2B_MSIL1C_20220723T112119_N0400_R037_T29SPD_20220723T121256&do=[terradue]"  # noqa: E501
+                "value": "https://catalog.terradue.com/sentinel2/search?format=atom&uid=S2B_MSIL1C_20220723T112119_N0400_R037_T29SPD_20220723T121256&do=[terradue]"
             },
             "ndvi_threshold": {"value": "0.19"},
             "ndwi_threshold": {"value": "0.18"},

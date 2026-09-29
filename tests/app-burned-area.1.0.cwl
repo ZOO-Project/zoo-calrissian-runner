@@ -35,7 +35,7 @@ $graph:
       ResourceRequirement: {}
       InlineJavascriptRequirement: {}
       DockerRequirement:
-        dockerPull: docker.pkg.github.com/eoepca/app-burned-area/burned-area:1.0
+        dockerPull: ghcr.io/eoepca/app-burned-area/burned-area:1.0
   - class: Workflow
     doc: Burned area detection based on NDVI/NDWI thresholds
     id: burned-area
