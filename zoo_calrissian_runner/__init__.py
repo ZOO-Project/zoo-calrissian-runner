@@ -8,6 +8,9 @@ import uuid
 from datetime import datetime, timezone
 from io import StringIO
 
+import re
+from typing import Any
+
 # from typing import Union
 import attr
 import cwl_loader as _cwl_loader_module
@@ -20,8 +23,7 @@ import yaml
 # from eoap_cwlwrap import wrap_locations
 # from cwl_loader import dump_cwl
 from cwl_loader import (
-    dump_cwl_with_custom_requirements,
-    extract_dask_config,
+    dump_cwl,
     load_cwl_from_location,
     order_graph_by_dependencies,
 )
@@ -55,6 +57,74 @@ __all__ = [
 ]
 from zoo_calrissian_runner.handlers import ExecutionHandler
 
+
+def extract_dask_config(app_package_path: str) -> dict[str, Any] | None:
+    with open(app_package_path, encoding="utf-8") as stream:
+        document = yaml.safe_load(stream)
+
+    if not isinstance(document, dict):
+        raise ValueError("The CWL document must be a mapping")
+
+    configs: list[dict[str, Any]] = []
+
+    def visit(node: Any) -> None:
+        if isinstance(node, list):
+            for item in node:
+                visit(item)
+            return
+
+        if not isinstance(node, dict):
+            return
+
+        for section in ("requirements", "hints"):
+            requirements = node.get(section, {})
+
+            if isinstance(requirements, dict):
+                entries = requirements.items()
+            elif isinstance(requirements, list):
+                if any(not isinstance(item, dict) for item in requirements):
+                    raise ValueError(f"Section {section} is invalid")
+                entries = (
+                    (item.get("class", ""), item) for item in requirements
+                )
+            else:
+                raise ValueError(f"Invalid {section} section")
+
+            for name, fields in entries:
+                if (
+                    isinstance(name, str)
+                    and re.split(r"[:/#]", name)[-1]
+                    == "DaskGatewayRequirement"
+                ):
+                    if not isinstance(fields, dict):
+                        raise ValueError(
+                            "DaskGatewayRequirement must be a mapping"
+                        )
+                    configs.append(
+                        {
+                            key: value
+                            for key, value in fields.items()
+                            if key != "class"
+                        }
+                    )
+
+        for key in ("$graph", "steps", "run"):
+            child = node.get(key)
+            if key == "steps" and isinstance(child, dict):
+                child = list(child.values())
+            visit(child)
+
+    visit(document)
+
+    if not configs:
+        return None
+
+    if any(config != configs[0] for config in configs[1:]):
+        raise ValueError(
+            "Multiple incompatible Dask configurations in the CWL"
+        )
+
+    return configs[0]
 
 # useful class for hints in CWL
 @attr.s
@@ -167,8 +237,7 @@ class ZooCalrissianRunner(BaseRunner):
                 f"Loading CWL from {app_package_path} to extract custom requirements"
             )
             try:
-                load_cwl_from_location(app_package_path)
-                dask_config = extract_dask_config()
+                dask_config = extract_dask_config(app_package_path)
                 if dask_config:
                     logger.info(
                         f"Dask Gateway configuration found in custom requirements: {dask_config}"
@@ -573,10 +642,9 @@ class ZooCalrissianRunner(BaseRunner):
 
             stream = StringIO()
             # Pass the saved cache explicitly: stage-in/out loads above cleared the global cache
-            dump_cwl_with_custom_requirements(
+            dump_cwl(
                 process=full_graph,
-                stream=stream,
-                custom_requirements_cache=saved_cache,
+                stream=stream
             )
             wf = yaml.safe_load(stream.getvalue())
         except Exception as e:

@@ -1,4 +1,5 @@
 dependencies:
+  - python=3.12
   - cwl-wrapper >= 0.10.0
   - pycalrissian
   - pip
