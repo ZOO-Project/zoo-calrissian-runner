@@ -6,7 +6,7 @@ envFrom:
   - secretRef:
       name: localstack-auth
 image:
-  tag: "3.8"
+  tag: "4.4.0"
 service:
   type: ClusterIP
 startupScriptContent: |
