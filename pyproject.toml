@@ -26,24 +26,30 @@ classifiers = [
 dependencies = [
     "zoo-runner-common",
     "zoo-template-common",
-    "pycalrissian",
-    "eoap_cwlwrap",
+    "pycalrissian>=0.8.2",
+    "eoap-cwlwrap>=0.31.0",
     "cwl-utils>=0.14",
     "attrs",
     "loguru",
     "setuptools",
-    "kubernetes>=34.1.0",
+    "kubernetes>=35.0.0",
     "cwltool",
     "zoo-framework"
 ]
 
 [project.urls]
-Documentation = "https://github.com/EOEPCA/zoo-calrissian-runner#readme"
-Issues = "https://github.com/EOEPCA/zoo-calrissian-runner/issues"
-Source = "https://github.com/EOEPCA/zoo-calrissian-runner"
+Homepage = "https://github.com/ZOO-Project/zoo-calrissian-runner"
+Documentation = "https://zoo-project.github.io/zoo-calrissian-runner/"
+Issues = "https://github.com/ZOO-Project/zoo-calrissian-runner/issues"
+Source = "https://github.com/ZOO-Project/zoo-calrissian-runner"
+Changelog = "https://github.com/ZOO-Project/zoo-calrissian-runner/blob/main/CHANGELOG.md"
 
 [tool.hatch.version]
 path = "zoo_calrissian_runner/__about__.py"
+
+
+[tool.hatch.metadata]
+allow-direct-references = true
 
 
 [tool.coverage.run]
@@ -72,15 +78,16 @@ PIP_EXTRA_INDEX_URL = "https://test.pypi.org/simple/"
 skip-install = false
 dependencies = [
     "zoo-runner-common",
-    "pycalrissian",
-    "eoap_cwlwrap",
+    "pycalrissian>=0.8.2",
+    "eoap-cwlwrap>=0.31.0",
     "cwl-utils>=0.14",
+    "cwl-loader>=0.28.0",
     "attrs",
     "loguru",
     "setuptools",
-    "kubernetes==28.1.0",
+    "kubernetes==35.0.0",
     "cwltool",
-    "zoo-framework"
+    "zoo-framework",
 ]
 
 
@@ -88,15 +95,16 @@ dependencies = [
 skip-install = false
 
 dependencies = [
-    "nose2",
+    "pytest",
     "coverage",
-    "pycalrissian",
-    "eoap_cwlwrap",
+    "pycalrissian>=0.8.2",
+    "eoap-cwlwrap>=0.31.0",
+    "cwl-loader>=0.28.0",
     "cwl-utils>=0.14",
     "attrs",
     "loguru",
     "setuptools",
-    "kubernetes==28.1.0",
+    "kubernetes==35.0.0",
     "cwltool",
     "zoo-framework",
     "python-dotenv"
@@ -107,12 +115,20 @@ PIP_EXTRA_INDEX_URL = "https://test.pypi.org/simple/"
 RETRY_ATTEMPTS="0"
 
 [tool.hatch.envs.test.scripts]
-test = "hatch run nose2"
-testv = "hatch run nose2 --verbose"
-cov = ["coverage run --source=zoo_calrissian_runner -m nose2", "coverage report"]
+# hatch re-syncs the declared dependencies (reverting cwl-loader and
+# pycalrissian to the versions eoap-cwlwrap/PyPI pin) on every `hatch run`,
+# undoing post-install-commands - so both overrides are repeated here too.
+_pin-cwl-loader-fork = "pip install --force-reinstall --no-deps git+https://github.com/GeoLabs/cwl-loader.git@feature/merged-patch"
+_pin-pycalrissian-fix = "pip install --force-reinstall --no-deps git+https://github.com/ZOO-Project/pycalrissian.git@aee352268500bc97a79a43022ea82398e3d9e0dc"
+test = ["_pin-cwl-loader-fork", "_pin-pycalrissian-fix", "pytest {args}"]
+testv = ["_pin-cwl-loader-fork", "_pin-pycalrissian-fix", "pytest -v {args}"]
+cov = ["_pin-cwl-loader-fork", "_pin-pycalrissian-fix", "coverage run --source=zoo_calrissian_runner -m pytest {args}", "coverage report"]
 
 [[tool.hatch.envs.test.matrix]]
 python = ["3.10", "3.11", "3.12"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
 
 [tool.hatch.envs.docs]
 skip-install = false

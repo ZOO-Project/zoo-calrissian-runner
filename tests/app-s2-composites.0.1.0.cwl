@@ -36,7 +36,7 @@ $graph:
         scatter: stac_item
         scatterMethod: dotproduct
       node_dnbr:
-        run: "#main"
+        run: "#dnbr_clt"
         in:
           tifs:
             source: node_nbr/nbr
@@ -145,7 +145,7 @@ $graph:
     requirements:
       InlineJavascriptRequirement: {}
       DockerRequirement:
-        dockerPull: docker.io/osgeo/gdal
+        dockerPull: ghcr.io/osgeo/gdal:ubuntu-full-3.13.3
     baseCommand: gdal_translate
     arguments:
       - -projwin
@@ -201,7 +201,7 @@ $graph:
     requirements:
       InlineJavascriptRequirement: {}
       DockerRequirement:
-        dockerPull: osgeo/gdal
+        dockerPull: ghcr.io/osgeo/gdal:ubuntu-full-3.13.3
     baseCommand: gdal_translate
     arguments:
       - -co

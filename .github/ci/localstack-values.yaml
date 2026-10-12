@@ -1,0 +1,15 @@
+enableStartupScripts: true
+# LOCALSTACK_AUTH_TOKEN is never stored here: it's created as a Kubernetes
+# Secret (see the "Create LocalStack auth secret" workflow step) from the
+# LOCALSTACK_AUTH_TOKEN GitHub Actions secret, and pulled in via envFrom.
+envFrom:
+  - secretRef:
+      name: localstack-auth
+image:
+  tag: "3.8"
+service:
+  type: ClusterIP
+startupScriptContent: |
+  #!/bin/bash
+
+  awslocal s3 mb s3://results
