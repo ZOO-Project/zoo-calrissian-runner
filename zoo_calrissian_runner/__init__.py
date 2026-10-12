@@ -2,13 +2,12 @@ import inspect
 
 # import mimetypes
 import os
+import re
 
 # import sys
 import uuid
 from datetime import datetime, timezone
 from io import StringIO
-
-import re
 from typing import Any
 
 # from typing import Union
@@ -24,7 +23,6 @@ import yaml
 # from cwl_loader import dump_cwl
 from cwl_loader import (
     dump_cwl,
-    load_cwl_from_location,
     order_graph_by_dependencies,
 )
 from cwl_loader import load_cwl_from_location as load_workflow
@@ -63,7 +61,7 @@ def extract_dask_config(app_package_path: str) -> dict[str, Any] | None:
         document = yaml.safe_load(stream)
 
     if not isinstance(document, dict):
-        raise ValueError("The CWL document must be a mapping")
+        raise TypeError("The CWL document must be a mapping")
 
     configs: list[dict[str, Any]] = []
 
@@ -84,28 +82,19 @@ def extract_dask_config(app_package_path: str) -> dict[str, Any] | None:
             elif isinstance(requirements, list):
                 if any(not isinstance(item, dict) for item in requirements):
                     raise ValueError(f"Section {section} is invalid")
-                entries = (
-                    (item.get("class", ""), item) for item in requirements
-                )
+                entries = ((item.get("class", ""), item) for item in requirements)
             else:
-                raise ValueError(f"Invalid {section} section")
+                raise TypeError(f"Invalid {section} section")
 
             for name, fields in entries:
                 if (
                     isinstance(name, str)
-                    and re.split(r"[:/#]", name)[-1]
-                    == "DaskGatewayRequirement"
+                    and re.split(r"[:/#]", name)[-1] == "DaskGatewayRequirement"
                 ):
                     if not isinstance(fields, dict):
-                        raise ValueError(
-                            "DaskGatewayRequirement must be a mapping"
-                        )
+                        raise TypeError("DaskGatewayRequirement must be a mapping")
                     configs.append(
-                        {
-                            key: value
-                            for key, value in fields.items()
-                            if key != "class"
-                        }
+                        {key: value for key, value in fields.items() if key != "class"}
                     )
 
         for key in ("$graph", "steps", "run"):
@@ -120,11 +109,10 @@ def extract_dask_config(app_package_path: str) -> dict[str, Any] | None:
         return None
 
     if any(config != configs[0] for config in configs[1:]):
-        raise ValueError(
-            "Multiple incompatible Dask configurations in the CWL"
-        )
+        raise ValueError("Multiple incompatible Dask configurations in the CWL")
 
     return configs[0]
+
 
 # useful class for hints in CWL
 @attr.s
@@ -642,10 +630,7 @@ class ZooCalrissianRunner(BaseRunner):
 
             stream = StringIO()
             # Pass the saved cache explicitly: stage-in/out loads above cleared the global cache
-            dump_cwl(
-                process=full_graph,
-                stream=stream
-            )
+            dump_cwl(process=full_graph, stream=stream)
             wf = yaml.safe_load(stream.getvalue())
         except Exception as e:
             logger.error(f"Cannot wrap CWL: {e}")
