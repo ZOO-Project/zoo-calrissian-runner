@@ -26,7 +26,7 @@ classifiers = [
 dependencies = [
     "zoo-runner-common",
     "zoo-template-common",
-    "pycalrissian",
+    "pycalrissian>=0.8.2",
     "eoap-cwlwrap>=0.31.0",
     "cwl-utils>=0.14",
     "attrs",
@@ -78,31 +78,16 @@ PIP_EXTRA_INDEX_URL = "https://test.pypi.org/simple/"
 skip-install = false
 dependencies = [
     "zoo-runner-common",
-    "pycalrissian",
+    "pycalrissian>=0.8.2",
     "eoap-cwlwrap>=0.31.0",
     "cwl-utils>=0.14",
+    "cwl-loader>=0.28.0",
     "attrs",
     "loguru",
     "setuptools",
     "kubernetes==35.0.0",
     "cwltool",
-    "zoo-framework"
-]
-# eoap-cwlwrap pins an exact cwl-loader release that doesn't have the
-# custom-requirements/Dask support this project needs yet (not published
-# to PyPI). Force-install the fork afterward, same as the Docker image
-# does, rather than declare it as a top-level dependency - pip refuses to
-# resolve two different direct references for the same package name.
-#
-# pycalrissian's only PyPI release (0.7.1) hard-pins kubernetes==28.1.0
-# and calls the client.models.V1Subject class that kubernetes>=29 removed
-# (renamed to RbacV1Subject). The fix is on pycalrissian's develop branch
-# (the pre-release for the upcoming 0.8.0, version-aware class selection)
-# but hasn't been released, so force-install that commit too, with --no-deps
-# to skip its own stale pin.
-post-install-commands = [
-    "pip install --force-reinstall git+https://github.com/GeoLabs/cwl-loader.git@feature/merged-patch",
-    "pip install --force-reinstall --no-deps git+https://github.com/ZOO-Project/pycalrissian.git@aee352268500bc97a79a43022ea82398e3d9e0dc",
+    "zoo-framework",
 ]
 
 
@@ -112,8 +97,9 @@ skip-install = false
 dependencies = [
     "pytest",
     "coverage",
-    "pycalrissian",
+    "pycalrissian>=0.8.2",
     "eoap-cwlwrap>=0.31.0",
+    "cwl-loader>=0.28.0",
     "cwl-utils>=0.14",
     "attrs",
     "loguru",
@@ -122,11 +108,6 @@ dependencies = [
     "cwltool",
     "zoo-framework",
     "python-dotenv"
-]
-# See tool.hatch.envs.default's post-install-commands comment above.
-post-install-commands = [
-    "pip install --force-reinstall git+https://github.com/GeoLabs/cwl-loader.git@feature/merged-patch",
-    "pip install --force-reinstall --no-deps git+https://github.com/ZOO-Project/pycalrissian.git@aee352268500bc97a79a43022ea82398e3d9e0dc",
 ]
 
 [tool.hatch.envs.test.env-vars]
