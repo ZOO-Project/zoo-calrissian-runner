@@ -56,7 +56,7 @@ jobs:
     # Start Minikube
     - name: Start Minikube
       run: |
-        minikube start --driver=docker --kubernetes-version v1.35.0
+        minikube start --driver=docker --memory=12g --cpus=4 --kubernetes-version v1.35.0
     # Set and export KUBECONFIG path
     - name: Set Envs and paths
       run: |
