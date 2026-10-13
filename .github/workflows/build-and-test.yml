@@ -98,14 +98,11 @@ jobs:
     - name: Debug stage-in logs
       if: always()
       run: |
-        echo "PWD=$(pwd)"
-        echo "GITHUB_WORKSPACE=$GITHUB_WORKSPACE"
-        echo "RUNNER_TEMP=$RUNNER_TEMP"
 
-        for base in "." "$GITHUB_WORKSPACE" "$RUNNER_TEMP" "$HOME"; do
+        for base in "./test-logs/tests_test_s2_app_burned.py_TestSentinel2BurnedArea_test_execution/" ; do
           [ -d "$base" ] || continue
           echo "Searching in $base"
-          { find "$base" -type f \( -name "directory_stage_in_0.log" -o -name "directory_stage_in_1.log" -o -name "report.json" -o -name "step_1.log" \) -print 2>/dev/null || true; } \
+          { find "$base" -type f \( -name "*.log" -o -name "*.json" \) -print 2>/dev/null || true; } \
           | while read -r f; do
               echo "===== $f ====="
               sed -n '1,200p' "$f" || true

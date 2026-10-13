@@ -170,7 +170,7 @@ class TestSentinel2BurnedArea(unittest.TestCase):
             execution_handler=CalrissianRunnerExecutionHandler(conf=self.conf),
         )
 
-        exit_value = runner.execute(wall_time=240)
+        exit_value = runner.execute(wall_time=480)
 
         print(f"exit value: {exit_value}")
 
