@@ -95,3 +95,11 @@ jobs:
       run: |
         #hatch run test.py310:cov
         hatch -e test run pytest
+    - name: Debug stage-in logs
+      if: always()
+      run: |
+        echo "Search for potential stage-in logs..."
+        find /tmp -type f \( -name "directory_stage_in_0.log" -o -name "directory_stage_in_1.log" \) -print | while read -r f; do
+          echo "===== $f ====="
+          cat "$f" || true
+        done
