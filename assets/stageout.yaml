@@ -98,7 +98,22 @@ requirements:
           endpoint_url = os.environ["STAGEOUT_AWS_SERVICEURL"]
 
           shutil.copytree(cat_url, "/tmp/catalog")
-          cat = pystac.read_file(os.path.join("/tmp/catalog", "catalog.json"))
+
+          # Some STAC-producing tools (e.g. "stacme") emit a non-conformant
+          # lowercase `type` (e.g. "catalog" instead of "Catalog"), which
+          # pystac rejects with a STACTypeError. Normalize it before loading.
+          import json as _json
+          catalog_path = os.path.join("/tmp/catalog", "catalog.json")
+          with open(catalog_path) as _f:
+              _raw_catalog = _json.load(_f)
+          _valid_types = {"catalog": "Catalog", "collection": "Collection", "feature": "Feature"}
+          _raw_type = _raw_catalog.get("type", "")
+          if _raw_type.lower() in _valid_types and _raw_type != _valid_types[_raw_type.lower()]:
+              _raw_catalog["type"] = _valid_types[_raw_type.lower()]
+              with open(catalog_path, "w") as _f:
+                  _json.dump(_raw_catalog, _f)
+
+          cat = pystac.read_file(catalog_path)
 
           class CustomStacIO(DefaultStacIO):
               """Custom STAC IO class that uses boto3 to read from S3."""

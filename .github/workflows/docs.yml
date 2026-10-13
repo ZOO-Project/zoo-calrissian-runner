@@ -34,6 +34,6 @@ jobs:
           pip install .
       - name: update API docs
         run: |
-          pdocs as_markdown --output_dir docs/api/ --exclude_source --overwrite zoo_calrissian_runner
+          micromamba run -n env_zoo_calrissian pdocs as_markdown --output_dir docs/api/ --exclude_source --overwrite zoo_calrissian_runner
 
-      - run: mkdocs gh-deploy --force
+      - run: micromamba run -n env_zoo_calrissian mkdocs gh-deploy --force
