@@ -10,4 +10,5 @@ dependencies:
     - mkdocs-material
     - mkdocs-jupyter
     - cwl-loader
+    - botocore
   - loguru
