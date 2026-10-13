@@ -93,18 +93,4 @@ jobs:
           --wait --timeout 5m
     - name: Run Tests with Hatch
       run: |
-        #hatch run test.py310:cov
         hatch -e test run pytest
-    - name: Debug stage-in logs
-      if: always()
-      run: |
-
-        for base in "./test-logs/tests_test_s2_app_burned.py_TestSentinel2BurnedArea_test_execution/" ; do
-          [ -d "$base" ] || continue
-          echo "Searching in $base"
-          { find "$base" -type f \( -name "*.log" -o -name "*.json" \) -print 2>/dev/null || true; } \
-          | while read -r f; do
-              echo "===== $f ====="
-              sed -n '1,200p' "$f" || true
-            done
-        done
